@@ -6,7 +6,7 @@ Collected metrics include:
  - UDP bandwidth (Mbsp), jitter (ms), and datagram loss (%) using [iperf3]
  - HTTP throughput (rps) and latency (ms) using [wrk]
 
-For each of these we test message size in steps from 10 to 10000 bytes.
+For each of these we test message size in steps from a minimum (100B) to a maximum (1500B).
 
 # Example
 
