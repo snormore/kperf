@@ -12,4 +12,4 @@ WORKDIR /app
 RUN cd httpserver && \
     go build -o /usr/local/bin/httpserver
 
-CMD ["goreman", "-set-ports=false", "start"]
+CMD ["goreman", "start"]
