@@ -8,9 +8,9 @@ Collected metrics include:
 
 For each of these we test message size in steps from 10 to 10000 bytes.
 
-# Examples
+# Example
 
-The following commands assume you are running `iperf -s -p3000` and `docker run --rm -p80:80 snormore/hello` on the destination server.
+The following commands assume you are running `iperf3 -s -p3000` and `docker run --rm -p80:80 snormore/hello` on the destination server.
 
 ```
 perf -client <src_ip> -server <dst_ip>

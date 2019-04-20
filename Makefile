@@ -11,22 +11,39 @@ TIMEOUT      = 15
 V 			 = 0
 Q 			 = $(if $(filter 1,$V),,@)
 M 			 = $(shell printf "\033[34;1m▶\033[0m")
+DOCKER       = docker
+DOCKER_OWNER = snormore
 
 export GO111MODULE=on
 
 .PHONY: all
 all: build
 
-build: fmt lint $(BIN) ; $(info $(M) building executable…) @ ## Build program binary
+build: build-client build-server
+
+build-client-package: fmt lint $(BIN) ; $(info $(M) building executable...) @ ## Build program binary
 	$Q $(GO) build \
 		-ldflags '-X $(PACKAGE)/cmd.PackageName=$(PACKAGE_NAME) -X $(PACKAGE)/cmd.Version=$(VERSION) -X $(PACKAGE)/cmd.BuildTimestamp=$(DATE) -X $(PACKAGE)/cmd.GitCommit=$(GIT_COMMIT)' \
 		-o $(BIN)/$(PACKAGE_NAME) main.go
+
+build-client: ; $(info $(M) building client docker image...) @
+	$Q $(DOCKER) build -t $(DOCKER_OWNER)/$(PACKAGE_NAME)-client -f docker/client/Dockerfile .
+
+build-server: ; $(info $(M) building server docker image...) @
+	$Q cd docker/server && $(DOCKER) build -t $(DOCKER_OWNER)/$(PACKAGE_NAME)-server .
+
+run-client: SERVER_IP=$(shell docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(PACKAGE_NAME)-server)
+run-client: build-client ; $(info $(M) running client docker image...) @
+	@$(DOCKER) run --rm -e "SERVER_IP=$(SERVER_IP)" -e "HTTP_PORT=8000" -e "IPERF_PORT=5000" -it $(DOCKER_OWNER)/$(PACKAGE_NAME)-client $(ARGS)
+
+run-server: build-server ; $(info $(M) building server docker image...) @
+	@$(DOCKER) run --rm -it --name $(PACKAGE_NAME)-server -e "HTTP_PORT=8000" -e "IPERF_PORT=5000" $(DOCKER_OWNER)/$(PACKAGE_NAME)-server $(ARGS)
 
 # Tools
 
 $(BIN):
 	@mkdir -p $@
-$(BIN)/%: | $(BIN) ; $(info $(M) building $(REPOSITORY)…)
+$(BIN)/%: | $(BIN) ; $(info $(M) building $(REPOSITORY)...)
 	$Q tmp=$$(mktemp -d); \
 	   env GO111MODULE=off GOPATH=$$tmp GOBIN=$(BIN) $(GO) get $(REPOSITORY) \
 		|| ret=$$?; \
@@ -57,10 +74,10 @@ test-verbose: ARGS=-v            ## Run tests in verbose mode with coverage repo
 test-race:    ARGS=-race         ## Run tests with race detector
 $(TEST_TARGETS): NAME=$(MAKECMDGOALS:test-%=%)
 $(TEST_TARGETS): test
-check test tests: fmt lint ; $(info $(M) running $(NAME:%=% )tests…) @ ## Run tests
+check test tests: fmt lint ; $(info $(M) running $(NAME:%=% )tests...) @ ## Run tests
 	$Q $(GO) test -timeout $(TIMEOUT)s $(ARGS) $(TESTPKGS)
 
-test-xml: fmt lint | $(GO2XUNIT) ; $(info $(M) running $(NAME:%=% )tests…) @ ## Run tests with xUnit output
+test-xml: fmt lint | $(GO2XUNIT) ; $(info $(M) running $(NAME:%=% )tests...) @ ## Run tests with xUnit output
 	$Q mkdir -p test
 	$Q 2>&1 $(GO) test -timeout 20s -v $(TESTPKGS) | tee test/tests.output
 	$(GO2XUNIT) -fail -input test/tests.output -output test/tests.xml
@@ -72,7 +89,7 @@ COVERAGE_HTML = $(COVERAGE_DIR)/index.html
 .PHONY: test-coverage test-coverage-tools
 test-coverage-tools: | $(GOCOVMERGE) $(GOCOV) $(GOCOVXML)
 test-coverage: COVERAGE_DIR := $(CURDIR)/test/coverage.$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
-test-coverage: fmt lint test-coverage-tools ; $(info $(M) running coverage tests…) @ ## Run coverage tests
+test-coverage: fmt lint test-coverage-tools ; $(info $(M) running coverage tests...) @ ## Run coverage tests
 	$Q mkdir -p $(COVERAGE_DIR)/coverage
 	$Q for pkg in $(TESTPKGS); do \
 		$(GO) test \
@@ -87,17 +104,17 @@ test-coverage: fmt lint test-coverage-tools ; $(info $(M) running coverage tests
 	$Q $(GOCOV) convert $(COVERAGE_PROFILE) | $(GOCOVXML) > $(COVERAGE_XML)
 
 .PHONY: lint
-lint: | $(GOLINT) ; $(info $(M) running golint…) @ ## Run golint
+lint: | $(GOLINT) ; $(info $(M) running golint...) @ ## Run golint
 	$Q $(GOLINT) -set_exit_status $(PKGS)
 
 .PHONY: fmt
-fmt: ; $(info $(M) running gofmt…) @ ## Run gofmt on all source files
+fmt: ; $(info $(M) running gofmt...) @ ## Run gofmt on all source files
 	$Q $(GO) fmt ./...
 
 # Misc
 
 .PHONY: clean
-clean: ; $(info $(M) cleaning…)	@ ## Cleanup everything
+clean: ; $(info $(M) cleaning...)	@ ## Cleanup everything
 	@rm -rf $(BIN)
 	@rm -rf test/tests.* test/coverage.*
 
