@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -eo pipefail
+. script/env
+echo "Building server docker image..."
+cd server
+docker build -t ${DOCKER_OWNER}/${PACKAGE_NAME}-server .

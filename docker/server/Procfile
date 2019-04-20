@@ -1,2 +1,0 @@
-http: PORT=${HTTP_PORT:-8000} httpserver
-iperf: iperf3 -s -p ${IPERF_PORT:-5000}
