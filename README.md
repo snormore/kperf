@@ -10,10 +10,16 @@ For each of these we test message size in steps from 10 to 10000 bytes.
 
 # Example
 
-The following commands assume you are running `iperf3 -s -p3000` and `docker run --rm -p80:80 snormore/hello` on the destination server.
+Run the tests locally in Docker containers:
 
 ```
-perf -client <src_ip> -server <dst_ip>
+script/run-server
+```
+
+In another session:
+
+```
+script/run-client
 ```
 
 [iperf3]: https://iperf.fr/
