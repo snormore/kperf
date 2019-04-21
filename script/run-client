@@ -9,4 +9,5 @@ docker run --rm -it \
     -e "HTTP_PORT=8000" \
     -e "IPERF_PORT=7000" \
     -e "NETPERF_PORT=6000" \
+    -e "PRIVATE_TESTS=1" \
     ${DOCKER_OWNER}/${PACKAGE_NAME}-client $@

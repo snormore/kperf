@@ -25,9 +25,9 @@ export CLIENT_IP=<YOUR_CLIENT_IP>
 
 ```
 ssh root@${SERVER_IP} -- bash -c "apt-get update -qq && apt-get install -y docker.io"
-ssh root@${SERVER_IP} -- docker pull snormore/perf-server
+ssh root@${SERVER_IP} -- docker pull snormore/kperf-server
 ssh root@${SERVER_IP} -- docker run --rm -i \
-    --name perf-server \
+    --name kperf-server \
     --net=host \
     -e "HTTP_PORT=8000" \
     -e "IPERF_PORT=7000" \
@@ -37,20 +37,20 @@ ssh root@${SERVER_IP} -- docker run --rm -i \
     -p7000:7000/udp \
     -p6000:6000/tcp \
     -p6000:6000/udp \
-    snormore/perf-server
+    snormore/kperf-server
 ```
 
 ```
 ssh root@${CLIENT_IP} -- bash -c "apt-get update -qq && apt-get install -y docker.io"
-ssh root@${CLIENT_IP} -- docker pull snormore/perf-client
+ssh root@${CLIENT_IP} -- docker pull snormore/kperf-client
 ssh root@${CLIENT_IP} -- docker run --rm -i \
-    --name perf-client \
+    --name kperf-client \
     -e "SERVER_IP=${SERVER_IP}" \
     -e "HTTP_PORT=8000" \
     -e "IPERF_PORT=7000" \
     -e "NETPERF_PORT=6000" \
     -e "PRIVATE_TESTS=1" \
-    snormore/perf-client
+    snormore/kperf-client
 ```
 
 [netperf]: https://hewlettpackard.github.io/netperf/
