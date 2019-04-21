@@ -1,4 +1,4 @@
-module github.com/snormore/perf
+module github.com/snormore/kperf
 
 go 1.12
 

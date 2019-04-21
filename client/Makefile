@@ -1,5 +1,5 @@
-PACKAGE      = github.com/snormore/perf
-PACKAGE_NAME = perf
+PACKAGE      = github.com/snormore/kperf
+PACKAGE_NAME = kperf
 DATE        ?= $(shell date +%s)
 VERSION     ?= $(shell cat $(CURDIR)/VERSION)
 GIT_COMMIT   = $(shell git rev-parse HEAD)

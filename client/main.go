@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/snormore/perf/cmd"
+	"github.com/snormore/kperf/cmd"
 )
 
 func main() {

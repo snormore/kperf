@@ -27,6 +27,6 @@ ADD . /app
 WORKDIR /app
 RUN make
 
-# ENTRYPOINT ["/app/bin/perf"]
+# ENTRYPOINT ["/app/bin/kperf"]
 
 CMD ["/app/entrypoint.sh"]

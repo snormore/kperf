@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -eo pipefail
+. script/env
+script/build-client
+echo "Publishing client docker image..."
+cd client
+docker push ${DOCKER_OWNER}/${PACKAGE_NAME}-client

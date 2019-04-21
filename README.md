@@ -18,13 +18,40 @@ script/run-client
 
 ### Node-to-node
 
-ssh root@${SERVER_IP} -- apt-get update -qq && apt-get install docker.io
-ssh root@${SERVER_IP} -- docker pull snormore/perf-server
-ssh root@${SERVER_IP} -- docker run --rm -i --name perf-server -e "HTTP_PORT=8000" -e "IPERF_PORT=7000" -p8000:8000 -p7000:7000 snormore/perf-server
+```
+export SERVER_IP=<YOUR_SERVER_IP>
+export CLIENT_IP=<YOUR_CLIENT_IP>
+```
 
-ssh root@${CLIENT_IP} -- apt-get update -qq && apt-get install docker.io
+```
+ssh root@${SERVER_IP} -- bash -c "apt-get update -qq && apt-get install -y docker.io"
+ssh root@${SERVER_IP} -- docker pull snormore/perf-server
+ssh root@${SERVER_IP} -- docker run --rm -i \
+    --name perf-server \
+    --net=host \
+    -e "HTTP_PORT=8000" \
+    -e "IPERF_PORT=7000" \
+    -e "NETPERF_PORT=6000" \
+    -p8000:8000 \
+    -p7000:7000/tcp \
+    -p7000:7000/udp \
+    -p6000:6000/tcp \
+    -p6000:6000/udp \
+    snormore/perf-server
+```
+
+```
+ssh root@${CLIENT_IP} -- bash -c "apt-get update -qq && apt-get install -y docker.io"
 ssh root@${CLIENT_IP} -- docker pull snormore/perf-client
-ssh root@${CLIENT_IP} -- docker run --rm -i --name perf-client -e "SERVER_IP=${SERVER_IP}" -e "HTTP_PORT=8000" -e "IPERF_PORT=7000" snormore/perf-client
+ssh root@${CLIENT_IP} -- docker run --rm -i \
+    --name perf-client \
+    -e "SERVER_IP=${SERVER_IP}" \
+    -e "HTTP_PORT=8000" \
+    -e "IPERF_PORT=7000" \
+    -e "NETPERF_PORT=6000" \
+    -e "PRIVATE_TESTS=1" \
+    snormore/perf-client
+```
 
 [netperf]: https://hewlettpackard.github.io/netperf/
 [iperf3]: https://iperf.fr/

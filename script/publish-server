@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -eo pipefail
+. script/env
+script/build-server
+echo "Publishing server docker image..."
+cd server
+docker push ${DOCKER_OWNER}/${PACKAGE_NAME}-server
