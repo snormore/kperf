@@ -1,27 +1,36 @@
-Run a suite of network performance tests between a given client/server pair using [iperf3], [ping], and [wrk].
+Run a suite of network performance tests between a given client/server pair using [netperf], [iperf3], [ping], and [wrk].
 
-Collected metrics include:
- - Lantecy (ms) using [ping]
- - TCP bandwidth (Mbps) using [iperf3]
- - UDP bandwidth (Mbsp), jitter (ms), and datagram loss (%) using [iperf3]
- - HTTP throughput (rps) and latency (ms) using [wrk]
+## Running
 
-For each of these we test message size in steps from a minimum (100B) to a maximum (1500B).
+### Container-to-container local
 
-# Example
-
-Run the tests locally in Docker containers:
+Start the server:
 
 ```
 script/run-server
 ```
 
-In another session:
+In a different terminal, start the client that runs the tests:
 
 ```
 script/run-client
 ```
 
+### Node-to-node
+
+ssh root@${SERVER_IP} -- apt-get update -qq && apt-get install docker.io
+ssh root@${SERVER_IP} -- docker pull snormore/perf-server
+ssh root@${SERVER_IP} -- docker run --rm -i --name perf-server -e "HTTP_PORT=8000" -e "IPERF_PORT=7000" -p8000:8000 -p7000:7000 snormore/perf-server
+
+ssh root@${CLIENT_IP} -- apt-get update -qq && apt-get install docker.io
+ssh root@${CLIENT_IP} -- docker pull snormore/perf-client
+ssh root@${CLIENT_IP} -- docker run --rm -i --name perf-client -e "SERVER_IP=${SERVER_IP}" -e "HTTP_PORT=8000" -e "IPERF_PORT=7000" snormore/perf-client
+
+[netperf]: https://hewlettpackard.github.io/netperf/
 [iperf3]: https://iperf.fr/
 [ping]: https://linux.die.net/man/8/ping
 [wrk]: https://github.com/wg/wrk
+
+### Kubernetes pod-to-pod
+
+### Kubernetes pod-to-host

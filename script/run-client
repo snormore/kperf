@@ -7,5 +7,6 @@ echo "Running client docker image..."
 docker run --rm -it \
     -e "SERVER_IP=${SERVER_IP}" \
     -e "HTTP_PORT=8000" \
-    -e "IPERF_PORT=5000" \
+    -e "IPERF_PORT=7000" \
+    -e "NETPERF_PORT=6000" \
     ${DOCKER_OWNER}/${PACKAGE_NAME}-client $@
