@@ -1,0 +1,106 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kperf
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server-pod
+  namespace: kperf
+  labels:
+    app: server-pod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: server-pod
+  template:
+    metadata:
+      labels:
+        app: server-pod
+    spec:
+      containers:
+      - name: server-pod
+        image: snormore/kperf-server:latest
+        ports:
+        - containerPort: 8000
+        - containerPort: 7000
+        - containerPort: 6000
+        env:
+        - name: HTTP_PORT
+          value: "8000"
+        - name: IPERF_PORT
+          value: "7000"
+        - name: NETPERF_PORT
+          value: "6000"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: server-pod
+  namespace: kperf
+  labels:
+    name: server-pod
+    app: kperf
+spec:
+  ports:
+  - name: httpserver-tcp
+    protocol: TCP
+    port: 8000
+    targetPort: 8000
+  - name: iperf-tcp
+    protocol: TCP
+    port: 7000
+    targetPort: 7000
+  - name: iperf-udp
+    protocol: UDP
+    port: 7000
+    targetPort: 7000
+  - name: netserv-tcp
+    protocol: TCP
+    port: 6000
+    targetPort: 6000
+  - name: netserv-udp
+    protocol: UDP
+    port: 6000
+    targetPort: 6000
+  selector:
+    app: server-pod
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: server-host
+  namespace: kperf
+  labels:
+    app: server-host
+spec:
+  selector:
+    matchLabels:
+      app: server-host
+  template:
+    metadata:
+      labels:
+        app: server-host
+    spec:
+      # hostNetwork: true
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      containers:
+      - name: server-host
+        image: snormore/kperf-server:latest
+        ports:
+        - containerPort: 8000
+        - containerPort: 7000
+        - containerPort: 6000
+        env:
+        - name: HTTP_PORT
+          value: "8000"
+        - name: IPERF_PORT
+          value: "7000"
+        - name: NETPERF_PORT
+          value: "6000"

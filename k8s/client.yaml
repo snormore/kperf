@@ -1,0 +1,34 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kperf
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: client
+  namespace: kperf
+  labels:
+    app: client
+spec:
+  restartPolicy: Never
+  containers:
+  - name: client
+    image: snormore/kperf-client:latest
+    env:
+    - name: HTTP_PORT
+      value: "8000"
+    - name: IPERF_PORT
+      value: "7000"
+    - name: NETPERF_PORT
+      value: "6000"
+    - name: SERVER_IP
+      # value: "10.136.172.123"
+      value: "10.138.54.131"
+    - name: PRIVATE_TESTS
+      value: "1"
+  nodeSelector:
+    kubernetes.io/hostname: test-sfo-1-msmh
+    # kubernetes.io/hostname: test-nyc-1-msap
+    # kubernetes.io/hostname: test-nyc-1-msmi

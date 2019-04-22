@@ -2,7 +2,7 @@ FROM golang:1.12
 
 # Install iperf3
 RUN apt-get update -qq && \
-    apt-get install -y iperf3
+    apt-get install -y dnsutils iperf3
 
 # Install wrk
 RUN WRK_VERSION=$(curl -L https://github.com/wg/wrk/raw/master/CHANGES 2>/dev/null | \
